@@ -3,6 +3,7 @@ package com.zhyrgal.docburger.controller;
 import com.zhyrgal.docburger.config.JwtService;
 import com.zhyrgal.docburger.model.Role;
 import com.zhyrgal.docburger.model.User;
+import com.zhyrgal.docburger.service.ProfileService;
 import com.zhyrgal.docburger.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -18,13 +19,19 @@ import java.util.Map;
 public class AuthController {
 
     private final UserService userService;
+    private final ProfileService profileService;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
 
     @PostMapping("/register")
     public User register(@RequestBody User user) {
         user.setRole(Role.USER);
-        return userService.registerUser(user);
+        User savedUser = userService.registerUser(user);
+
+        // Создаем пустой профиль для нового пользователя
+        profileService.createEmptyProfile(savedUser);
+
+        return savedUser;
     }
 
     @PostMapping("/login")

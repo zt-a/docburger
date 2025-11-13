@@ -3,8 +3,10 @@ package com.zhyrgal.docburger.config;
 import com.zhyrgal.docburger.model.Category;
 import com.zhyrgal.docburger.model.User;
 import com.zhyrgal.docburger.model.Role;
+import com.zhyrgal.docburger.model.Profile;
 import com.zhyrgal.docburger.repository.CategoryRepository;
 import com.zhyrgal.docburger.repository.UserRepository;
+import com.zhyrgal.docburger.repository.ProfileRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -16,6 +18,7 @@ public class DataInitializer {
 
     private final CategoryRepository categoryRepository;
     private final UserRepository userRepository;
+    private final ProfileRepository profileRepository; // добавляем репозиторий профиля
     private final PasswordEncoder passwordEncoder;
 
     @PostConstruct
@@ -37,8 +40,15 @@ public class DataInitializer {
                     .password(passwordEncoder.encode("admin123"))
                     .role(Role.ADMIN)
                     .build();
-            userRepository.save(admin);
-            System.out.println("✅ Администратор создан: admin / admin123");
+            User savedAdmin = userRepository.save(admin);
+
+            // --- Создаем пустой профиль для администратора ---
+            Profile profile = Profile.builder()
+                    .user(savedAdmin)
+                    .build();
+            profileRepository.save(profile);
+
+            System.out.println("✅ Администратор создан: admin / admin123 и пустой профиль создан");
         } else {
             System.out.println("ℹ️ Администратор уже существует, пропускаем создание");
         }
